@@ -1,0 +1,6 @@
+requests
+pytz
+python-quoine
+pysher
+pubnub
+git+https://github.com/bitbankinc/python-bitbankcc.git

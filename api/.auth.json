@@ -1,0 +1,14 @@
+{
+  "bitpoint": {
+    "username": "aaa@hoge.com",
+    "password": "test"
+  },
+  "bitbank": {
+    "apikey": "0332",
+    "secret": "secret"
+  },
+  "quoine": {
+    "id":653,
+    "key":"ewjo=="
+  }
+}
