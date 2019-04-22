@@ -2,7 +2,7 @@
 import requests
 
 """
-LINEに通知を送る。
+LINEに通知を送る
 """
 LINE_TOKEN = {}
 LINE_TOKEN["main"]= ""

@@ -186,6 +186,7 @@ class Arbitrager():
             time.sleep(5)
             self.update_balance()
             total_balance = self.total_balance()
+            # トータルで見てポジションを持っていないことを確認する
             if self.start_balance[currency] * 0.92 - 0.01 < total_balance[currency] < self.start_balance[currency] * 1.06 + 0.01:
                 print('balance checked')
                 balance_diff, balance_diff_in_string = self.balance_diff(old_balance)
@@ -198,7 +199,4 @@ class Arbitrager():
             print(total_balance)
 
         raise Exception
-        # update balance
-
-
 
