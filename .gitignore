@@ -1,0 +1,4 @@
+.idea/
+getdata/node_modules/
+venv/
+api/.auth.json
