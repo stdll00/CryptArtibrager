@@ -3,7 +3,8 @@ from arbitrage import *
 
 bitpoint = api.bitpoint.Bitpoint(get_price_host="http://1/")
 quoinex = api.quoinex.Quoinex()
-at = Arbitrager([quoinex, bitpoint])
+bitbank = api.bitbank.BitBank()
+at = Arbitrager([quoinex, bitpoint, bitbank])
 def health_check():
     if not (-0.25 < at.start_balance['BTC'] < 0.25):
         raise ValueError

@@ -92,7 +92,7 @@ class BitBank(api.model.CryptExchange):
         if currency == "BTC":
             self.last_bid, self.last_ask = bid, ask
 
-        return bid, ask
+        return bid*0.9985, ask*1.0015
 
     def send_order(self, currency, price, amount, side, order_type='limit', base_currency="jpy"):
         assert side == 'buy' or side == 'sell'
