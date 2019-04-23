@@ -1,15 +1,20 @@
 from notification import notify
 from arbitrage import *
 
-
+bitpoint = api.bitpoint.Bitpoint(get_price_host="http://1/")
+quoinex = api.quoinex.Quoinex()
 at = Arbitrager([quoinex, bitpoint])
-quoinex.take_order('BTC', 1000, 0.001, side='buy')
+def health_check():
+    if not (-0.25 < at.start_balance['BTC'] < 0.25):
+        raise ValueError
+    #quoinex.take_order('BTC', 1000, 0.001, side='buy')
 
 start_balance = at.start_balance
-if not (-0.25 < bitpoint.balance['BTC'] + bitbank.balance['BTC'] + quoinex.balance['BTC'] < 0.25):
-    raise ValueError
-at.update_price()
 
+
+
+at.update_price()
+health_check()
 try:
     [print() for _ in range(len(at) * (len(at) - 1) + 1)]
     while True:

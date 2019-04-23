@@ -10,9 +10,7 @@ import datetime
 from socket import error as SocketError
 from collections import defaultdict, deque
 
-bitbank = api.bitbank.BitBank()
-bitpoint = api.bitpoint.Bitpoint()
-quoinex = api.quoinex.Quoinex()
+
 
 _debug = False
 _version = "1.06"
@@ -24,8 +22,6 @@ print("BTC thredsholds")
 if _debug:
     print("DEBUG MODE")
 print("version :", _version)
-print("tsucho:")
-get_all_balance.output(bitpoint, bitbank, quoinex)
 
 
 class Arbitrager():

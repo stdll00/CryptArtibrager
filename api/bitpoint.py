@@ -20,18 +20,17 @@ tradingPassword = "1234"
 
 requests.packages.urllib3.disable_warnings()
 BASE_PATH = "https://public.bitpoint.co.jp/bpj-api/"
-HOST = "http://127.0.0.1"
 
 
 class Bitpoint(CryptExchange):
     AMOUNT_LIMIT = 0
     BTC_AMOUNT_MAX = 1.1
     NAME = "BitPoint"
-    PRIORITY=-1
-    ASK_OFFSET = {"BTC":0}
+    PRIORITY = -1
+    ASK_OFFSET = {"BTC": 0}
     BID_OFFSET = {"BTC": 000}
 
-    def __init__(self, forever=True):
+    def __init__(self, forever=True, get_price_host="http://127.0.0.1"):
         self.account_auth_info = json.load(
             open(
                 os.path.join(
@@ -40,6 +39,7 @@ class Bitpoint(CryptExchange):
             )
         )["bitpoint"]
         self.forever = forever
+        self.get_price_host = get_price_host
 
         while True:
             try:
@@ -68,7 +68,6 @@ class Bitpoint(CryptExchange):
             t = threading.Timer(300, self.set_token)
             t.setDaemon(True)
             t.start()
-
 
     def get_balance(self, *args, **kwargs):
         for i in range(8):
@@ -117,19 +116,18 @@ class Bitpoint(CryptExchange):
         self.balance = result
         return result
 
-    @staticmethod
-    def _get_price(currency="BTC", amount_limit=0):
+    def _get_price(self, currency="BTC", amount_limit=0):
         assert currency in ["BTC", "BCC", "ETH"]
         if amount_limit > 0:
-            return 0, 100000000,0
-        res = requests.get("{}/bitpoint/{}.json".format(HOST, currency))
+            return 0, 100000000, 0
+        res = requests.get("{}/bitpoint/{}.json".format(self.get_price_host, currency))
         last_modified = CryptExchange.get_timestamp(res.headers['Last-Modified'])
         if CryptExchange.get_time_diff(res.headers['Last-Modified']) > 10:
-            return 0, 10000000,last_modified
+            return 0, 10000000, last_modified
         try:
             json.loads(res.text)
         except json.decoder.JSONDecodeError as e:
-            return 0, 10000000,last_modified
+            return 0, 10000000, last_modified
 
         for item in json.loads(res.text):
             if item["currencyCd1"] == currency:
@@ -137,17 +135,17 @@ class Bitpoint(CryptExchange):
                     sell = item["price"]
                 elif item["buySellCls"] == "3":
                     buy = item["price"]
-        return float(sell), float(buy),last_modified
+        return float(sell), float(buy), last_modified
 
-    def get_price(self,currency="BTC",amount_limit=AMOUNT_LIMIT):
-        sell, buy ,last_modified= self._get_price(currency=currency)
-        if  currency=="BTC":
+    def get_price(self, currency="BTC", amount_limit=AMOUNT_LIMIT):
+        sell, buy, last_modified = self._get_price(currency=currency)
+        if currency == "BTC":
             self.last_bid, self.last_ask = sell, buy
-        self.last_price[currency].update(sell,buy,last_modified)
+        self.last_price[currency].update(sell, buy, last_modified)
 
         return sell, buy
 
-    def send_order(self, currency, price, amount, side,order_type="limit"):
+    def send_order(self, currency, price, amount, side, order_type="limit"):
         assert side == 'buy' or side == 'sell'
         data = json.dumps({
             "tradingPassword": tradingPassword,
@@ -195,13 +193,14 @@ class Bitpoint(CryptExchange):
         """
         price = float(price)
         amount = float(amount)
+
         def update_available(execNominal):
             try:
-                if side=='buy':
-                    self.available["JPY"] -= execNominal*price
-                elif side=='sell':
-                    self.available[currency]-=execNominal
-                    self.balance[currency]-=execNominal
+                if side == 'buy':
+                    self.available["JPY"] -= execNominal * price
+                elif side == 'sell':
+                    self.available[currency] -= execNominal
+                    self.balance[currency] -= execNominal
                 print('update balance')
                 return execNominal
             except:
@@ -217,7 +216,7 @@ class Bitpoint(CryptExchange):
             if tmp_amount == amount:
                 print(_)
                 return update_available(amount)
-            elif tmp_amount>0:
+            elif tmp_amount > 0:
                 break
             time.sleep(0.4)
 
@@ -278,7 +277,7 @@ class Bitpoint(CryptExchange):
                     continue
                 total_buy_and_sell_jpy += float(order["execNominal"]) * float(order["orderPrice"])
                 total_jpy += float(order["execNominal"]) * float(order["orderPrice"]) * (
-                1 if order["buySellCls"] == "1" else -1)
+                    1 if order["buySellCls"] == "1" else -1)
                 if _debug:
                     print(order["orderNo"], order["orderNominal"], order["execNominal"])
             print(total_buy_and_sell_jpy, total_jpy)
@@ -297,12 +296,11 @@ class Bitpoint(CryptExchange):
     def amount_can_market_sell(self):
         return 0
 
-    def _stream(self,currency_list):
+    def _stream(self, currency_list):
         print("Stream Start {}".format(self.NAME))
         while True:
             for currency in currency_list:
                 self.get_price(currency)
-
 
     def simple_mm(self):
         position = -0.001
@@ -313,10 +311,11 @@ class Bitpoint(CryptExchange):
             if position < 0:
                 tmp_position = bp.take_order(currency='BTC', amount=0.001, price=bp.last_bid + 0.01, side='buy')
             else:
-                tmp_position = - bp.take_order(currency='BTC', amount=0.001, price=bp.last_ask -  0.01, side='sell')
+                tmp_position = - bp.take_order(currency='BTC', amount=0.001, price=bp.last_ask - 0.01, side='sell')
             position += tmp_position
-            print(position , tmp_position )
+            print(position, tmp_position)
             time.sleep(0.1)
+
 
 if __name__ == '__main__':
     import time
@@ -326,10 +325,10 @@ if __name__ == '__main__':
     print(bp.balance)
     print(bp.last_bid, bp.last_ask)
     print("can sell,buy : ", bp.amount_can_sell(), bp.amount_can_buy())
-    print(bp.get_order(orderNo=None , currency="BTC" , period="5"))
+    print(bp.get_order(orderNo=None, currency="BTC", period="5"))
 
     exit()
-    bp.run_stream(['BTC',"ETH"])
+    bp.run_stream(['BTC', "ETH"])
     bp.simple_mm()
     while True:
         print(bp.last_price)
