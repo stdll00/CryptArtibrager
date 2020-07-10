@@ -1,4 +1,4 @@
-# linter:
+linter:
 # # https://help.sider.review/getting-started/custom-configuration
 
 #   # https://help.sider.review/tools/javascript/eslint
@@ -12,12 +12,12 @@
 #     global: "require,exports:true"
 #     quiet: true
 
-#   # https://help.sider.review/tools/python/flake8
-#   flake8:
-#     plugins:
-#       - flake8-bandit
-#       - flake8-builtins==1.4.1
-#       - flake8-mypy>=17.3.3
+# https://help.sider.review/tools/python/flake8
+   flake8:
+     plugins:
+       - flake8-bandit
+       - flake8-builtins==1.4.1
+       - flake8-mypy>=17.3.3
 
 #   # https://help.sider.review/tools/others/misspell
 #   misspell:
